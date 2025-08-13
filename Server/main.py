@@ -388,6 +388,8 @@ async def get_an_ai_response_processed_by_the_server(payload: Dict[str, Any], to
         logger.error("Результат выполнения пустой.")
         return {"error": "FINAL RESPONSE IS EMPTY. (C) SLET CORP."}
     
+    print(final_response)
+    
     # Если все нормально шифруем ответ и возвращаем его
     encrypted_response = {"message": final_response}
     

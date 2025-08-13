@@ -140,19 +140,93 @@ function addUserMessage(text) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// Для преобразования Markdown ответов AI в HTML для сайта и отображения пользователю
+// Регистрируем только самые популярные языки для автоопределения
+hljs.registerAliases(['python', 'js', 'javascript', 'typescript', 'html', 'css', 'json', 'bash', 'shell'], 
+                   {languageName: 'javascript'});
+
+const markdownConverter = new showdown.Converter({
+    ghCodeBlocks: true,
+    tables: true,
+    strikethrough: true,
+    tasklists: true,
+    simplifiedAutoLink: true,
+    openLinksInNewWindow: true
+});
+
+function restoreNewlinesAndFormat(text) {
+    // Восстанавливаем переносы перед заголовками (от 1 до 6 # с пробелом после)
+    let formatted = text.replace(/(^|\n)(?=[#]{1,6}\s)/g, '$1\n');
+    
+    // Восстанавливаем переносы строк перед блоками кода
+    formatted = formatted.replace(/(```[a-z]*\n)/g, '\n$1');
+    
+    // Восстанавливаем переносы строк после блоков кода
+    formatted = formatted.replace(/(```\n)/g, '$1\n');
+    
+    // Заменяем одиночные переносы на двойные для лучшей читаемости
+    formatted = formatted.replace(/([^\n])\n([^\n])/g, '$1\n\n$2');
+    
+    // Убираем лишние пустые строки (более 2 подряд)
+    formatted = formatted.replace(/\n{3,}/g, '\n\n');
+    
+    // Убираем переносы в начале и конце
+    formatted = formatted.trim();
+    
+    return formatted;
+}
+
 // Функция для добавления сообщения бота
-function addBotMessage(text) {
+function addBotMessage(textOriginal) {
     const chatContainer = document.getElementById('chatContainer');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message bot-message';
     
     const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    // Сначала преобразуем Markdown в HTML
+    const formattedText = restoreNewlinesAndFormat(textOriginal);
+    const htmlContent = markdownConverter.makeHtml(formattedText);
+    
+    // Вставляем HTML в сообщение
     messageDiv.innerHTML = `
-        <div>${text}</div>
+        <div class="message-content">${htmlContent}</div>
         <div class="message-time">${time}</div>
     `;
     
+    // Добавляем сообщение в DOM
     chatContainer.appendChild(messageDiv);
+    
+    // Только после вставки в DOM обрабатываем блоки кода
+    messageDiv.querySelectorAll('pre code').forEach((block) => {
+        // Применяем подсветку
+        hljs.highlightElement(block);
+        
+        // Создаем кнопку копирования
+        const pre = block.parentElement;
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = 'Копировать';
+        copyBtn.title = 'Копировать в буфер обмена';
+        
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(block.textContent)
+                .then(() => {
+                    copyBtn.textContent = 'Скопировано!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Копировать';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Ошибка копирования: ', err);
+                    copyBtn.textContent = 'Ошибка';
+                });
+        });
+        
+        pre.style.position = 'relative';
+        pre.appendChild(copyBtn);
+    });
+    
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
@@ -919,8 +993,9 @@ async function sendRecognized(message, action="audio"/* action это источ
 
     status.textContent = 'Отправка...';
     sendEncryptedMessage(message=null, endpoint="/answer/serverprocessing", method="POST", json={message: final_text, chatId: globalUserChatId}).then(result_black => {
-        result = result_black.replace(/<BR>/g, '\n');
-        addBotMessage(result_black);
+        result = result_black;
+        console.log(result)
+        addBotMessage(result);
 
         status.textContent = 'Ответ получен!';
 

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown в HTML с Showdown.js и подсветкой кода</title>
+    <!-- Подключаем стили highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <style>
+        /* Стили для кнопки копирования */
+        .code-block {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 3px 8px;
+            background: #f1f1f1;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+            background: #e0e0e0;
+        }
+        /* Стили для блоков с кодом */
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            position: relative;
+        }
+        /* Стили для ссылок */
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="markdown-output-showdown"></div>
+
+    <!-- Подключаем Showdown.js -->
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+    <!-- Подключаем только core highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <!-- Подключаем автоопределение языков -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/go.min.js"></script>
+    <script>
+        // Регистрируем только самые популярные языки для автоопределения
+        hljs.registerAliases(['python', 'js', 'javascript', 'typescript', 'html', 'css', 'json', 'bash', 'shell'], 
+                           {languageName: 'javascript'});
+        
+        const converter = new showdown.Converter({
+            ghCodeBlocks: true,
+            tables: true,
+            strikethrough: true,
+            tasklists: true,
+            simplifiedAutoLink: true,
+            openLinksInNewWindow: true
+        });
+        
+        const myMarkdownText = `### Цитата
+
+> Это очень важная цитата.
+
+Пример кода на Python:
+
+\`\`\`python
+print("Hello, World!")
+def hello(name):
+    print(f"Hi, {name}")
+\`\`\`
+
+И на JavaScript:
+
+\`\`\`javascript
+console.log("Hello");
+document.querySelector('button').addEventListener('click', () => {
+    alert('Кнопка нажата!');
+});
+\`\`\`
+
+Пример кода на HTML:
+
+\`\`\`html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Пример</title>
+</head>
+<body>
+    <h1>Привет, мир!</h1>
+</body>
+</html>
+\`\`\`
+
+## Ссылки в Markdown
+
+Примеры ссылок:
+- [Официальный сайт Python](https://www.python.org)
+- [Документация Highlight.js](https://highlightjs.org/)
+`;
+
+        const htmlOutput = converter.makeHtml(myMarkdownText);
+        document.getElementById('markdown-output-showdown').innerHTML = htmlOutput;
+        
+        // Применяем подсветку ко всем блокам кода с автоопределением языка
+        document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+            
+            // Создаем кнопку копирования
+            const pre = block.parentElement;
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = 'Копировать';
+            copyBtn.title = 'Копировать в буфер обмена';
+            
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(block.textContent)
+                    .then(() => {
+                        copyBtn.textContent = 'Скопировано!';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Копировать';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Ошибка копирования: ', err);
+                        copyBtn.textContent = 'Ошибка';
+                    });
+            });
+            
+            pre.style.position = 'relative';
+            pre.appendChild(copyBtn);
+        });
+    </script>
+</body>
+</html>
