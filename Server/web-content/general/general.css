@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'rubik';
+    src: url('/static/general/rubik.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --primary-color: #39FF14;
+    --secondary-color: #2d2d2d;
+    --text-color: #e0e0e0;
+    --border-color: #444;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --background-color: #000000;
+    --card-color: #252525;
+    --left-panel-color: #212327;
+    --left-panel-split-color: rgb(95, 95, 95);
+
+
+    --accent-color: #39FF14;
+    --hover-color: #137102;
+    --hover-btn-color: rgb(204, 201, 201)
+}
+
+* {
+    font-family: "rubik";
+}
