@@ -1,0 +1,10 @@
+
+# Логи и временные файлы
+*.log
+logs/
+orbit-temp/
+__pycache__/
+.env
+*.db
+database/chats/
+
