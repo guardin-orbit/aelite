@@ -6,3 +6,4 @@ __pycache__/
 *.db
 database/chats/
 *.pem
+config.toml
