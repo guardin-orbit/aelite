@@ -13,3 +13,5 @@ loguru
 wikipedia
 requests
 vertexai
+pygame
+dbus-python

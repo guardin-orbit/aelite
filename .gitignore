@@ -1,3 +1,7 @@
 __pycache__/
 .env
 Server/config.toml
+Server/database/users.db
+Server/database/chats/
+Server/logs/
+Server/orbit-temp/orbit.log
